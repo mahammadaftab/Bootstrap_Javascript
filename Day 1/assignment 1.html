@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Habit Tracker</title>
+    <style>
+        /* --- CSS STYLES --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button#add-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button#add-btn:hover {
+            background-color: #218838;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li span {
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        /* Class for completed habits */
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Smart Habit Tracker</h2>
+        
+        <div class="input-group">
+            <input type="text" id="habit-input" placeholder="Enter a new habit...">
+            <button id="add-btn">Add Habit</button>
+        </div>
+
+        <ul id="habit-list">
+            </ul>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT LOGIC --- */
+        
+        // 1. Select DOM Elements
+        const habitInput = document.getElementById('habit-input');
+        const addBtn = document.getElementById('add-btn');
+        const habitList = document.getElementById('habit-list');
+
+        // 2. Load Habits from LocalStorage on startup
+        // We check if data exists, if not, we start with an empty array
+        let habits = JSON.parse(localStorage.getItem('habits')) || [];
+
+        // 3. Function to save to LocalStorage
+        function saveToLocalStorage() {
+            localStorage.setItem('habits', JSON.stringify(habits));
+        }
+
+        // 4. Function to Render (Display) the list
+        function renderHabits() {
+            // Clear current list to prevent duplicates
+            habitList.innerHTML = '';
+
+            habits.forEach((habit, index) => {
+                const li = document.createElement('li');
+
+                // Create text span
+                const span = document.createElement('span');
+                span.textContent = habit.text;
+                if (habit.done) {
+                    span.classList.add('completed');
+                }
+
+                // Toggle 'Done' on click
+                span.addEventListener('click', () => {
+                    toggleHabit(index);
+                });
+
+                // Create Delete Button
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.addEventListener('click', () => {
+                    deleteHabit(index);
+                });
+
+                li.appendChild(span);
+                li.appendChild(deleteBtn);
+                habitList.appendChild(li);
+            });
+        }
+
+        // 5. Add Habit Function
+        function addHabit() {
+            const text = habitInput.value.trim(); // Remove extra spaces
+            
+            if (text !== "") {
+                const newHabit = {
+                    text: text,
+                    done: false
+                };
+                
+                habits.push(newHabit);
+                habitInput.value = ''; // Clear input box
+                saveToLocalStorage();
+                renderHabits();
+            } else {
+                alert("Please write a habit first!");
+            }
+        }
+
+        // 6. Toggle Done Function
+        function toggleHabit(index) {
+            habits[index].done = !habits[index].done; // Flip true/false
+            saveToLocalStorage();
+            renderHabits();
+        }
+
+        // 7. Delete Habit Function
+        function deleteHabit(index) {
+            habits.splice(index, 1); // Remove 1 item at specific index
+            saveToLocalStorage();
+            renderHabits();
+        }
+
+        // 8. Event Listeners
+        addBtn.addEventListener('click', addHabit);
+        
+        // Allow pressing "Enter" key to add
+        habitInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addHabit();
+            }
+        });
+
+        // Initial Render
+        renderHabits();
+
+    </script>
+</body>
+</html>
